@@ -1,0 +1,78 @@
+{
+  "name": "readline-ui",
+  "description": "Create readline interface to use in prompts.",
+  "version": "0.1.0",
+  "homepage": "https://github.com/jonschlinkert/readline-ui",
+  "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
+  "repository": "jonschlinkert/readline-ui",
+  "bugs": {
+    "url": "https://github.com/jonschlinkert/readline-ui/issues"
+  },
+  "license": "MIT",
+  "files": [
+    "index.js",
+    "LICENSE",
+    "README.md"
+  ],
+  "main": "index.js",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "component-emitter": "^1.2.1",
+    "extend-shallow": "^2.0.1",
+    "mute-stream": "0.0.6"
+  },
+  "devDependencies": {
+    "gulp-format-md": "^0.1.10"
+  },
+  "keywords": [
+    "answer",
+    "answers",
+    "ask",
+    "checkbox",
+    "choice",
+    "cli",
+    "command",
+    "input",
+    "inquire",
+    "inquirer",
+    "interact",
+    "interface",
+    "list",
+    "menu",
+    "password",
+    "prompt",
+    "prompts",
+    "question",
+    "readline",
+    "stdin",
+    "stdout",
+    "terminal",
+    "tty",
+    "ui"
+  ],
+  "verb": {
+    "toc": false,
+    "layout": "default",
+    "tasks": [
+      "readme"
+    ],
+    "plugins": [
+      "gulp-format-md"
+    ],
+    "lint": {
+      "reflinks": true
+    },
+    "related": {
+      "list": ["enquirer"]
+    },
+    "reflinks": [
+      "verb",
+      "verb-generate-readme"
+    ]
+  }
+}
