@@ -11,19 +11,16 @@ var utils = require('readline-utils');
  */
 
 function UI(options) {
-  var defaults = {terminal: true, input: process.stdin, output: process.stdout};
-  var opts = extend(defaults, options);
+  var opts = utils.createOptions(options);
   this.output = opts.output;
   this.input = opts.input;
 
   if (typeof this.rl === 'undefined') {
-    this.rl = this.createInterface(opts);
+    this.rl = utils.createInterface(opts);
   }
 
-  this.rl.resume();
   this.force = this.forceClose.bind(this);
-
-  // Make sure that a new prompt begins on a newline when closing
+  this.rl.resume();
   this.rl.on('SIGINT', this.force);
   process.on('exit', this.force);
 }
@@ -39,8 +36,8 @@ Emitter(UI.prototype);
  */
 
 UI.prototype.forceClose = function() {
-  this.close();
-  this.output.write('\n');
+  this.output.write('\r');
+  utils.forceClose(this.rl);
 };
 
 /**
@@ -49,12 +46,7 @@ UI.prototype.forceClose = function() {
  */
 
 UI.prototype.close = function() {
-  process.removeListener('exit', this.force);
-  this.rl.removeListener('SIGINT', this.force);
-  this.rl.output.unmute();
-  this.rl.output.end();
-  this.rl.pause();
-  this.rl.close();
+  utils.close(this.rl);
 };
 
 /**
@@ -68,21 +60,6 @@ UI.prototype.finish = function() {
     this.close();
     return val;
   }.bind(this);
-};
-
-/**
- * If an interface isn't already defined, call `readline.createInterface()`
- * with the given options.
- *
- * @param {Object} `options`
- * @return {Object}
- */
-
-UI.prototype.createInterface = function(options) {
-  var ms = new MuteStream();
-  ms.pipe(options.output);
-  options.output = ms;
-  return readline.createInterface(options);
 };
 
 /**
