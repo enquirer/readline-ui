@@ -2,11 +2,11 @@
   "name": "readline-ui",
   "description": "Create readline interface to use in prompts.",
   "version": "0.1.0",
-  "homepage": "https://github.com/jonschlinkert/readline-ui",
+  "homepage": "https://github.com/enquirer/readline-ui",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
-  "repository": "jonschlinkert/readline-ui",
+  "repository": "enquirer/readline-ui",
   "bugs": {
-    "url": "https://github.com/jonschlinkert/readline-ui/issues"
+    "url": "https://github.com/enquirer/readline-ui/issues"
   },
   "license": "MIT",
   "files": [
@@ -23,8 +23,9 @@
   },
   "dependencies": {
     "component-emitter": "^1.2.1",
-    "extend-shallow": "^2.0.1",
-    "mute-stream": "0.0.6"
+    "readline-utils": "^0.1.0",
+    "string-width": "^1.0.2",
+    "strip-color": "^0.1.0"
   },
   "devDependencies": {
     "gulp-format-md": "^0.1.10"
@@ -68,7 +69,12 @@
       "reflinks": true
     },
     "related": {
-      "list": ["enquirer"]
+      "list": [
+        "enquirer",
+        "enquirer-question",
+        "prompt-choices",
+        "readline-utils"
+      ]
     },
     "reflinks": [
       "verb",
