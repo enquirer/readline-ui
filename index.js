@@ -5,6 +5,7 @@ var Emitter = require('component-emitter');
 var stringWidth = require('string-width');
 var stripColor = require('strip-color');
 var utils = require('readline-utils');
+var cached;
 
 /**
  * Create a readline interface to use in prompts
@@ -30,6 +31,8 @@ Emitter(UI.prototype);
  */
 
 UI.prototype.initInterface = function() {
+  if (this.initialized) return;
+  this.initialized = true;
   if (typeof this.rl === 'undefined') {
     this.rl = utils.createInterface(this.options);
   }
@@ -127,16 +130,6 @@ UI.prototype.render = function(str, bottomContent) {
 };
 
 /**
- * Default method for writing a prompt to the terminal. This can be overridden.
- */
-
-UI.prototype.write = function() {
-  this.rl.setPrompt('');
-  this.rl.output.unmute();
-  this.rl.output.write('\n');
-};
-
-/**
  * Remove `n` lines from the bottom of the terminal
  * @param {Number} `lines` Number of lines to remove
  * @api public
@@ -209,7 +202,27 @@ UI.prototype.finish = function() {
 };
 
 /**
+ * Default method for writing a prompt to the terminal. This can be overridden.
+ */
+
+UI.prototype.end = function() {
+  this.rl.setPrompt('');
+  this.rl.output.unmute();
+  this.rl.output.write('\n');
+};
+
+/**
  * Expose `UI`
  */
 
 module.exports = UI;
+
+/**
+ * Expose `UI.create` for using a single instance across multiple prompts.
+ */
+
+module.exports.create = function(options) {
+  if (cached) return cached;
+  cached = new UI(options);
+  return cached;
+};
