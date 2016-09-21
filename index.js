@@ -1,6 +1,6 @@
 'use strict';
 
-var readline = require('readline');
+var debug = require('debug')('readline-ui');
 var Emitter = require('component-emitter');
 var stringWidth = require('string-width');
 var stripColor = require('strip-color');
@@ -12,6 +12,12 @@ var cached;
  */
 
 function UI(options) {
+  if (!(this instanceof UI)) {
+    var ui = Object.create(UI.prototype);
+    UI.apply(ui, arguments);
+    return ui;
+  }
+  debug('initializing from <%s>', __filename);
   this.options = utils.createOptions(options);
   this.output = this.options.output;
   this.input = this.options.input;
