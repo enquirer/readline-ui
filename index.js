@@ -211,10 +211,10 @@ UI.prototype.finish = function() {
  * Default method for writing a prompt to the terminal. This can be overridden.
  */
 
-UI.prototype.end = function() {
+UI.prototype.end = function(linefeed) {
   this.rl.setPrompt('');
   this.rl.output.unmute();
-  this.rl.output.write('\n');
+  this.rl.output.write(linefeed !== false ? '\n' : '');
 };
 
 /**
