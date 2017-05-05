@@ -21,14 +21,14 @@
   },
   "dependencies": {
     "component-emitter": "^1.2.1",
-    "debug": "^2.6.3",
-    "readline-utils": "^0.1.4",
+    "debug": "^2.6.6",
+    "readline-utils": "^0.1.6",
     "string-width": "^2.0.0",
     "strip-color": "^0.1.0"
   },
   "devDependencies": {
     "gulp-format-md": "^0.1.12",
-    "mocha": "^3.2.0"
+    "mocha": "^3.3.0"
   },
   "keywords": [
     "answer",
@@ -75,10 +75,6 @@
         "prompt-choices",
         "readline-utils"
       ]
-    },
-    "reflinks": [
-      "verb",
-      "verb-generate-readme"
-    ]
+    }
   }
 }
