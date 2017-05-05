@@ -167,6 +167,14 @@ UI.prototype.restoreCursorPos = function() {
 };
 
 /**
+ * Proxy to `.write` on the readline instance
+ */
+
+UI.prototype.write = function() {
+  this.rl.write.apply(this.rl, arguments);
+};
+
+/**
  * Pause the input stream, allowing it to be resumed later if necessary.
  */
 
