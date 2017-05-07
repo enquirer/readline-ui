@@ -44,6 +44,7 @@ UI.prototype.initInterface = function() {
   }
   this.force = this.forceClose.bind(this);
   this.input.on('keypress', this.onKeypress.bind(this, this));
+  this.on('keypress', this.onKeypress.bind(this, this));
   this.rl.resume();
   this.rl.on('line', this.emit.bind(this, 'line'));
   this.rl.on('SIGINT', this.force);
