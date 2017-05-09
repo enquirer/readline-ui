@@ -1,7 +1,7 @@
 {
   "name": "readline-ui",
   "description": "Create readline interface to use in prompts.",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "homepage": "https://github.com/enquirer/readline-ui",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "repository": "enquirer/readline-ui",
@@ -71,7 +71,7 @@
     "related": {
       "list": [
         "enquirer",
-        "enquirer-question",
+        "prompt-question",
         "prompt-choices",
         "readline-utils"
       ]
