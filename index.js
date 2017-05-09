@@ -43,8 +43,8 @@ UI.prototype.initInterface = function() {
     this.rl = utils.createInterface(this.options);
   }
   this.force = this.forceClose.bind(this);
-  this.input.on('keypress', this.onKeypress.bind(this, this));
-  this.on('keypress', this.onKeypress.bind(this, this));
+  this.onKeypress = this.onKeypress.bind(this);
+  this.input.on('keypress', this.onKeypress);
   this.rl.resume();
   this.rl.on('line', this.emit.bind(this, 'line'));
   this.rl.on('SIGINT', this.force);
@@ -52,16 +52,15 @@ UI.prototype.initInterface = function() {
 };
 
 /**
- * Close the interface when the keypress is `^C`
+ * Emit keypress events
  */
 
-UI.prototype.onKeypress = function(app, str, key) {
-  var event = utils.normalize(str, key);
-  if (event) {
-    app.emit('keypress', event);
-    if (event.key.name) {
-      app.emit(event.key.name, event);
-    }
+UI.prototype.onKeypress = function(str, key) {
+  var events = utils.normalize(str, key);
+  for (var i = 0; i < events.length; i++) {
+    var event = events[i];
+    this.emit('keypress', event.key.name, event.key);
+    this.emit(event.key.name, event.key);
   }
 };
 
@@ -82,7 +81,7 @@ UI.prototype.render = function(str, bottomContent) {
    */
 
   var promptLine = utils.lastLine(str);
-  var rawPromptLine = stripColor(promptLine);
+  var rawPromptLine = this.unstyle(promptLine);
 
   // Remove the last line from our prompt. We can't rely on the str of
   // rl.line (mainly because of the password prompt), so just rely on it's
@@ -125,10 +124,12 @@ UI.prototype.render = function(str, bottomContent) {
   }
 
   // Reset cursor at the beginning of the line
-  utils.left(this.rl, stringWidth(utils.lastLine(fullContent)));
+  var lastLine = utils.lastLine(fullContent);
+  utils.left(this.rl, stringWidth(lastLine));
 
   // Adjust cursor on the right
-  utils.right(this.rl, cursorPos.cols);
+  var newPos = this.unstyle(lastLine).length;
+  utils.right(this.rl, newPos);
 
   // Set up state for next re-rendering
   this.appendedLines = bottomContentHeight;
@@ -224,6 +225,25 @@ UI.prototype.end = function(linefeed) {
   this.rl.setPrompt('');
   this.rl.output.unmute();
   this.rl.output.write(linefeed !== false ? '\n' : '');
+  utils.cursorShow(this.rl);
+};
+
+/**
+ * Convenience method for debugging
+ */
+
+UI.prototype.log = function() {
+  console.log(Array(10).join('\n'));
+  console.log.apply(console, arguments);
+  console.log(Array(10).join('\n'));
+};
+
+/**
+ * Convenience method for debugging
+ */
+
+UI.prototype.unstyle = function(str) {
+  return stripColor(str);
 };
 
 /**
