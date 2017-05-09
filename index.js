@@ -56,12 +56,7 @@ UI.prototype.initInterface = function() {
  */
 
 UI.prototype.onKeypress = function(str, key) {
-  var events = utils.normalize(str, key);
-  for (var i = 0; i < events.length; i++) {
-    var event = events[i];
-    this.emit('keypress', event.key.name, event.key);
-    this.emit(event.key.name, event.key);
-  }
+  utils.emitKeypress(this, str, key);
 };
 
 /**
@@ -76,16 +71,13 @@ UI.prototype.render = function(str, bottomContent) {
   this.rl.output.unmute();
   this.clearLines(this.appendedLines);
 
-  /**
-   * Write message to screen and setPrompt to control backspace
-   */
-
+  // Write message to screen and setPrompt to control backspace
   var promptLine = utils.lastLine(str);
   var rawPromptLine = this.unstyle(promptLine);
 
-  // Remove the last line from our prompt. We can't rely on the str of
-  // rl.line (mainly because of the password prompt), so just rely on it's
-  // length.
+  // Remove the last line from our prompt. We can't rely
+  // on the str of rl.line (mainly because of the password
+  // prompt), so just rely on it's length.
   var prompt = promptLine;
   if (this.rl.line.length) {
     prompt = prompt.slice(0, -this.rl.line.length);
@@ -102,8 +94,9 @@ UI.prototype.render = function(str, bottomContent) {
     bottomContent = utils.forceLineReturn(bottomContent, width);
   }
 
-  // Manually insert an extra line if we're at the end of the line. This
-  // prevents the cursor from appearing at the beginning of the current line.
+  // Manually insert an extra line if we're at the end of
+  // the line. This prevents the cursor from appearing at
+  // the beginning of the current line.
   if (rawPromptLine.length % width === 0) {
     str += '\n';
   }
@@ -111,12 +104,9 @@ UI.prototype.render = function(str, bottomContent) {
   var fullContent = str + (bottomContent ? '\n' + bottomContent : '');
   this.rl.output.write(fullContent);
 
-  /**
-   * Re-adjust the cursor at the correct position.
-   */
-
-  // We need to consider parts of the prompt under the cursor as part of the bottom
-  // string in order to correctly cleanup and re-render.
+  // We need to consider parts of the prompt under the
+  // cursor as part of the bottom string in order to
+  // correctly cleanup and re-render.
   var promptLineUpDiff = Math.floor(rawPromptLine.length / width) - cursorPos.rows;
   var bottomContentHeight = promptLineUpDiff + (bottomContent ? utils.height(bottomContent) : 0);
   if (bottomContentHeight > 0) {
@@ -186,9 +176,9 @@ UI.prototype.pause = function() {
 };
 
 /**
- * Close the `readline.Interface` instance and relinquish control over the input
- * and output streams. Also removes event listeners, and restores/unmutes prompt
- * functionality.
+ * Close the `readline.Interface` instance and relinquish
+ * control over the input and output streams. Also removes
+ * event listeners, and restores/unmutes prompt functionality.
  */
 
 UI.prototype.close = function() {
@@ -205,8 +195,9 @@ UI.prototype.forceClose = function() {
 };
 
 /**
- * Returns an "indentity" function that calls `.close()`, which can
- * be used as the final `.then()` function with promises.
+ * Returns an "indentity" function that calls `.close()`,
+ * which can be used as the final `.then()` function with
+ * promises.
  */
 
 UI.prototype.finish = function() {
@@ -218,7 +209,8 @@ UI.prototype.finish = function() {
 };
 
 /**
- * Default method for writing a prompt to the terminal. This can be overridden.
+ * Default method for writing a prompt to the terminal.
+ * This can be overridden.
  */
 
 UI.prototype.end = function(linefeed) {
@@ -233,9 +225,9 @@ UI.prototype.end = function(linefeed) {
  */
 
 UI.prototype.log = function() {
-  console.log(Array(10).join('\n'));
+  this.rl.output.unmute();
   console.log.apply(console, arguments);
-  console.log(Array(10).join('\n'));
+  this.rl.output.mute();
 };
 
 /**
@@ -253,7 +245,8 @@ UI.prototype.unstyle = function(str) {
 module.exports = UI;
 
 /**
- * Expose `UI.create` for using a single instance across multiple prompts.
+ * Expose `UI.create` for using a single instance across
+ * multiple prompts.
  */
 
 module.exports.create = function(options) {
