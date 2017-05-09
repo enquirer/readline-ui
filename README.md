@@ -19,7 +19,7 @@ var ui = new UI();
 
 ## API
 
-### [.render](index.js#L75)
+### [.render](index.js#L70)
 
 Render the given `str` in the terminal, and optional `bottomContent`.
 
@@ -29,7 +29,7 @@ Render the given `str` in the terminal, and optional `bottomContent`.
 * `bottomContent` **{String}**
 * `returns` **{undefined}**
 
-### [.clearLines](index.js#L146)
+### [.clearLines](index.js#L136)
 
 Remove `n` lines from the bottom of the terminal
 
