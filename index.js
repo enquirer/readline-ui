@@ -42,9 +42,9 @@ UI.prototype.initInterface = function() {
   if (typeof this.rl === 'undefined') {
     this.rl = utils.createInterface(this.options);
   }
+
   this.force = this.forceClose.bind(this);
-  this.onKeypress = this.onKeypress.bind(this);
-  this.input.on('keypress', this.onKeypress);
+  this.input.on('keypress', this.onKeypress.bind(this));
   this.rl.resume();
   this.rl.on('line', this.emit.bind(this, 'line'));
   this.rl.on('SIGINT', this.force);
@@ -52,7 +52,12 @@ UI.prototype.initInterface = function() {
 };
 
 /**
- * Emit keypress events
+ * Handle `keypress` events.
+ *
+ * @param {String} `str`
+ * @param {Object} `key`
+ * @return {undefined}
+ * @api public
  */
 
 UI.prototype.onKeypress = function(str, key) {
@@ -159,14 +164,6 @@ UI.prototype.restoreCursorPos = function() {
 };
 
 /**
- * Proxy to `.write` on the readline instance
- */
-
-UI.prototype.write = function() {
-  this.rl.write.apply(this.rl, arguments);
-};
-
-/**
  * Pause the input stream, allowing it to be resumed later if necessary.
  */
 
@@ -213,10 +210,10 @@ UI.prototype.finish = function() {
  * This can be overridden.
  */
 
-UI.prototype.end = function(linefeed) {
+UI.prototype.end = function(newline) {
   this.rl.setPrompt('');
   this.rl.output.unmute();
-  this.rl.output.write(linefeed !== false ? '\n' : '');
+  this.rl.output.write(newline !== false ? '\n' : '');
   utils.cursorShow(this.rl);
 };
 
