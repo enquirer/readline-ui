@@ -23,8 +23,7 @@
     "component-emitter": "^1.2.1",
     "debug": "^2.6.6",
     "readline-utils": "^2.1.0",
-    "string-width": "^2.0.0",
-    "strip-color": "^0.1.0"
+    "string-width": "^2.0.0"
   },
   "devDependencies": {
     "gulp-format-md": "^0.1.12",

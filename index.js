@@ -3,7 +3,6 @@
 var debug = require('debug')('readline-ui');
 var Emitter = require('component-emitter');
 var stringWidth = require('string-width');
-var stripColor = require('strip-color');
 var utils = require('readline-utils');
 var cached;
 
@@ -43,12 +42,12 @@ UI.prototype.initInterface = function() {
     this.rl = utils.createInterface(this.options);
   }
 
-  this.force = this.forceClose.bind(this);
+  this.forceClose = this.forceClose.bind(this);
   this.input.on('keypress', this.onKeypress.bind(this));
   this.rl.resume();
   this.rl.on('line', this.emit.bind(this, 'line'));
-  this.rl.on('SIGINT', this.force);
-  process.on('exit', this.force);
+  this.rl.on('SIGINT', this.forceClose);
+  process.on('exit', this.forceClose);
 };
 
 /**
@@ -65,20 +64,20 @@ UI.prototype.onKeypress = function(str, key) {
 };
 
 /**
- * Render the given `str` in the terminal, and optional `bottomContent`.
+ * Render the given `str` in the terminal, and optional `footer`.
  * @param {String} `str`
- * @param {String} `bottomContent`
+ * @param {String} `footer`
  * @return {undefined}
  * @api public
  */
 
-UI.prototype.render = function(str, bottomContent) {
+UI.prototype.render = function(str, footer) {
   this.rl.output.unmute();
   this.clearLines(this.appendedLines);
 
   // Write message to screen and setPrompt to control backspace
   var promptLine = utils.lastLine(str);
-  var rawPromptLine = this.unstyle(promptLine);
+  var rawPromptLine = utils.unstyle(promptLine);
 
   // Remove the last line from our prompt. We can't rely
   // on the str of rl.line (mainly because of the password
@@ -91,12 +90,12 @@ UI.prototype.render = function(str, bottomContent) {
   this.rl.setPrompt(prompt);
 
   // setPrompt will change cursor position, now we can get correct value
-  var cursorPos = this.rl._getCursorPos();
+  var cursorPos = this.cacheCursorPos();
   var width = utils.cliWidth(this.rl);
 
   str = utils.forceLineReturn(str, width);
-  if (bottomContent) {
-    bottomContent = utils.forceLineReturn(bottomContent, width);
+  if (footer) {
+    footer = utils.forceLineReturn(footer, width);
   }
 
   // Manually insert an extra line if we're at the end of
@@ -106,16 +105,16 @@ UI.prototype.render = function(str, bottomContent) {
     str += '\n';
   }
 
-  var fullContent = str + (bottomContent ? '\n' + bottomContent : '');
+  var fullContent = str + (footer ? '\n' + String(footer) : '');
   this.rl.output.write(fullContent);
 
   // We need to consider parts of the prompt under the
   // cursor as part of the bottom string in order to
   // correctly cleanup and re-render.
   var promptLineUpDiff = Math.floor(rawPromptLine.length / width) - cursorPos.rows;
-  var bottomContentHeight = promptLineUpDiff + (bottomContent ? utils.height(bottomContent) : 0);
-  if (bottomContentHeight > 0) {
-    utils.up(this.rl, bottomContentHeight);
+  var footerHeight = promptLineUpDiff + (footer ? utils.height(footer) : 0);
+  if (footerHeight > 0) {
+    utils.up(this.rl, footerHeight);
   }
 
   // Reset cursor at the beginning of the line
@@ -123,11 +122,11 @@ UI.prototype.render = function(str, bottomContent) {
   utils.left(this.rl, stringWidth(lastLine));
 
   // Adjust cursor on the right
-  var newPos = this.unstyle(lastLine).length;
+  var newPos = utils.unstyle(lastLine).length;
   utils.right(this.rl, newPos);
 
   // Set up state for next re-rendering
-  this.appendedLines = bottomContentHeight;
+  this.appendedLines = footerHeight;
   this.height = utils.height(fullContent);
   this.rl.output.mute();
 };
@@ -150,7 +149,7 @@ UI.prototype.clearLines = function(n) {
 
 UI.prototype.cacheCursorPos = function() {
   this.cursorPos = utils.cursorPosition(this.rl);
-  return this;
+  return this.cursorPos;
 };
 
 /**
@@ -218,21 +217,15 @@ UI.prototype.end = function(newline) {
 };
 
 /**
- * Convenience method for debugging
+ * Utility for writing to stdout.
  */
 
 UI.prototype.log = function() {
   this.rl.output.unmute();
+  console.log();
   console.log.apply(console, arguments);
+  console.log();
   this.rl.output.mute();
-};
-
-/**
- * Convenience method for debugging
- */
-
-UI.prototype.unstyle = function(str) {
-  return stripColor(str);
 };
 
 /**
