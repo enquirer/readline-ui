@@ -1,5 +1,6 @@
 'use strict';
 
+var util = require('util');
 var debug = require('debug')('readline-ui');
 var Emitter = require('component-emitter');
 var stringWidth = require('string-width');
@@ -18,8 +19,6 @@ function UI(options) {
   }
   debug('initializing from <%s>', __filename);
   this.options = utils.createOptions(options);
-  this.output = this.options.output;
-  this.input = this.options.input;
   this.appendedLines = 0;
   this.height = 0;
   this.initInterface();
@@ -38,14 +37,23 @@ Emitter(UI.prototype);
 UI.prototype.initInterface = function() {
   if (this.initialized) return;
   this.initialized = true;
+  var self = this;
   if (typeof this.rl === 'undefined') {
     this.rl = utils.createInterface(this.options);
   }
 
   this.forceClose = this.forceClose.bind(this);
-  this.input.on('keypress', this.onKeypress.bind(this));
+  this.onKeypress = this.onKeypress.bind(this);
+
+  this.rl.input.on('keypress', self.onKeypress);
   this.rl.resume();
-  this.rl.on('line', this.emit.bind(this, 'line'));
+
+  this.rl.on('line', function(line) {
+    setImmediate(function() {
+      self.emit('line', line, {name: 'line', value: line});
+    })
+  });
+
   this.rl.on('SIGINT', this.forceClose);
   process.on('exit', this.forceClose);
 };
@@ -64,9 +72,9 @@ UI.prototype.onKeypress = function(input, key) {
 };
 
 /**
- * Render the given `input` in the terminal, with optional `footer`.
+ * Render the prompt with the given `input` and optional `footer`.
  * @param {String} `input`
- * @param {String} `footer`
+ * @param {String} `footer` (optional)
  * @return {undefined}
  * @api public
  */
@@ -145,6 +153,7 @@ UI.prototype.clearLines = function(n) {
 /**
  * Cache the current cursor's column and line position.
  * @returns {Object} UI instance.
+ * @api public
  */
 
 UI.prototype.cacheCursorPos = function() {
@@ -155,6 +164,7 @@ UI.prototype.cacheCursorPos = function() {
 /**
  * Restore the cursor position to the cached column and line.
  * @return {Object} UI instance.
+ * @api public
  */
 
 UI.prototype.restoreCursorPos = function() {
@@ -164,6 +174,7 @@ UI.prototype.restoreCursorPos = function() {
 
 /**
  * Pause the input stream, allowing it to be resumed later if necessary.
+ * @api public
  */
 
 UI.prototype.pause = function() {
@@ -175,6 +186,7 @@ UI.prototype.pause = function() {
  * Close the `readline.Interface` instance and relinquish
  * control over the input and output streams. Also removes
  * event listeners, and restores/unmutes prompt functionality.
+ * @api public
  */
 
 UI.prototype.close = function() {
@@ -184,6 +196,7 @@ UI.prototype.close = function() {
 
 /**
  * Close the interface when the keypress is `^C`
+ * @api public
  */
 
 UI.prototype.forceClose = function() {
@@ -194,19 +207,22 @@ UI.prototype.forceClose = function() {
  * Returns an "indentity" function that calls `.close()`,
  * which can be used as the final `.then()` function with
  * promises.
+ * @api public
  */
 
 UI.prototype.finish = function() {
+  var ui = this;
   return function(val) {
-    this.close();
-    this.emit('finish');
+    ui.close();
+    ui.emit('finish');
     return val;
-  }.bind(this);
+  };
 };
 
 /**
  * Default method for writing a prompt to the terminal.
  * This can be overridden.
+ * @api public
  */
 
 UI.prototype.end = function(newline) {
@@ -217,12 +233,16 @@ UI.prototype.end = function(newline) {
 };
 
 /**
- * Utility for writing to stdout.
+ * Unmute then write to the output stream that was used
+ * to create the readline interface, then re-mute the stream.
+ * Useful for debugging prompts.
+ *
+ * @api public
  */
 
-UI.prototype.log = function() {
+UI.prototype.log = function(input) {
   this.rl.output.unmute();
-  console.log.apply(console, arguments);
+  this.rl.output.write(util.inspect.apply(util, input));
   this.rl.output.mute();
 };
 
