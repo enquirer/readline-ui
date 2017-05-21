@@ -59,30 +59,30 @@ UI.prototype.initInterface = function() {
  * @api public
  */
 
-UI.prototype.onKeypress = function(str, key) {
-  utils.emitKeypress(this, str, key);
+UI.prototype.onKeypress = function(input, key) {
+  utils.emitKeypress(this, input, key);
 };
 
 /**
- * Render the given `str` in the terminal, and optional `footer`.
- * @param {String} `str`
+ * Render the given `input` in the terminal, with optional `footer`.
+ * @param {String} `input`
  * @param {String} `footer`
  * @return {undefined}
  * @api public
  */
 
-UI.prototype.render = function(str, footer) {
+UI.prototype.render = function(input, footer) {
   this.rl.output.unmute();
   this.clearLines(this.appendedLines);
 
   // Write message to screen and setPrompt to control backspace
-  var promptLine = utils.lastLine(str);
-  var rawPromptLine = utils.unstyle(promptLine);
+  var line = utils.lastLine(input);
+  var rawLine = utils.unstyle(line);
 
   // Remove the last line from our prompt. We can't rely
-  // on the str of rl.line (mainly because of the password
+  // on the input of rl.line (mainly because of the password
   // prompt), so just rely on it's length.
-  var prompt = promptLine;
+  var prompt = line;
   if (this.rl.line.length) {
     prompt = prompt.slice(0, -this.rl.line.length);
   }
@@ -93,7 +93,7 @@ UI.prototype.render = function(str, footer) {
   var cursorPos = this.cacheCursorPos();
   var width = utils.cliWidth(this.rl);
 
-  str = utils.forceLineReturn(str, width);
+  input = utils.forceLineReturn(input, width);
   if (footer) {
     footer = utils.forceLineReturn(footer, width);
   }
@@ -101,17 +101,17 @@ UI.prototype.render = function(str, footer) {
   // Manually insert an extra line if we're at the end of
   // the line. This prevents the cursor from appearing at
   // the beginning of the current line.
-  if (rawPromptLine.length % width === 0) {
-    str += '\n';
+  if (rawLine.length % width === 0) {
+    input += '\n';
   }
 
-  var fullContent = str + (footer ? '\n' + String(footer) : '');
+  var fullContent = input + (footer ? '\n' + String(footer) : '');
   this.rl.output.write(fullContent);
 
   // We need to consider parts of the prompt under the
   // cursor as part of the bottom string in order to
   // correctly cleanup and re-render.
-  var promptLineUpDiff = Math.floor(rawPromptLine.length / width) - cursorPos.rows;
+  var promptLineUpDiff = Math.floor(rawLine.length / width) - cursorPos.rows;
   var footerHeight = promptLineUpDiff + (footer ? utils.height(footer) : 0);
   if (footerHeight > 0) {
     utils.up(this.rl, footerHeight);
@@ -122,7 +122,7 @@ UI.prototype.render = function(str, footer) {
   utils.left(this.rl, stringWidth(lastLine));
 
   // Adjust cursor on the right
-  var newPos = utils.unstyle(lastLine).length;
+  var newPos = utils.unstyle(input).length;
   utils.right(this.rl, newPos);
 
   // Set up state for next re-rendering
@@ -222,9 +222,7 @@ UI.prototype.end = function(newline) {
 
 UI.prototype.log = function() {
   this.rl.output.unmute();
-  console.log();
   console.log.apply(console, arguments);
-  console.log();
   this.rl.output.mute();
 };
 
