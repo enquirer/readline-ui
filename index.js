@@ -46,7 +46,7 @@ UI.prototype.initInterface = function() {
   this.onKeypress = this.onKeypress.bind(this);
 
   this.rl.input.on('keypress', self.onKeypress);
-  this.rl.resume();
+  this.resume();
 
   this.rl.on('line', function(line) {
     setImmediate(function() {
@@ -173,6 +173,15 @@ UI.prototype.restoreCursorPos = function() {
 };
 
 /**
+ * Resume the input stream.
+ * @api public
+ */
+
+UI.prototype.resume = function() {
+  this.rl.resume();
+};
+
+/**
  * Pause the input stream, allowing it to be resumed later if necessary.
  * @api public
  */
@@ -233,6 +242,34 @@ UI.prototype.end = function(newline) {
 };
 
 /**
+ * Mutes the output stream that was used to create the
+ * readline interface, and returns a function for unmuting the
+ * stream. This is useful in unit tests.
+ *
+ * ```js
+ * // mute the stream
+ * var unmute = ui.mute();
+ *
+ * // unmute the stream
+ * unmute();
+ * ```
+ * @return {Function}
+ * @api public
+ */
+
+UI.prototype.mute = function() {
+  var rl = this.rl;
+  var unmute = rl.output.unmute;
+  rl.output.unmute = function() {};
+  rl.output.mute();
+
+  return function() {
+    rl.output.unmute = unmute;
+    unmute();
+  };
+};
+
+/**
  * Unmute then write to the output stream that was used
  * to create the readline interface, then re-mute the stream.
  * Useful for debugging prompts.
@@ -242,7 +279,7 @@ UI.prototype.end = function(newline) {
 
 UI.prototype.log = function(input) {
   this.rl.output.unmute();
-  this.rl.output.write(util.inspect.apply(util, input));
+  this.rl.output.write(util.inspect.apply(util, arguments));
   this.rl.output.mute();
 };
 
