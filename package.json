@@ -1,7 +1,7 @@
 {
   "name": "readline-ui",
   "description": "Create a readline interface with default settings to use in prompts.",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "homepage": "https://github.com/enquirer/readline-ui",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "repository": "enquirer/readline-ui",
